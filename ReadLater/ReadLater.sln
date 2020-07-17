@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "..\Entities\Entities\Entities.csproj", "{24DAA595-F413-4F33-8DF7-AD61B3387F03}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "..\Services\Services\Services.csproj", "{9F519A4C-61A5-4DF8-926B-585A88EA59E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVC", "..\MVC\MVC\MVC.csproj", "{B190CA89-042D-4831-8AB7-F6EC0A1F5088}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "..\API\API\API.csproj", "{AFA4BA29-52D9-428F-BC84-222A29ED430B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{B190CA89-042D-4831-8AB7-F6EC0A1F5088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B190CA89-042D-4831-8AB7-F6EC0A1F5088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B190CA89-042D-4831-8AB7-F6EC0A1F5088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFA4BA29-52D9-428F-BC84-222A29ED430B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA4BA29-52D9-428F-BC84-222A29ED430B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFA4BA29-52D9-428F-BC84-222A29ED430B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA4BA29-52D9-428F-BC84-222A29ED430B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
