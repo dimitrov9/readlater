@@ -22,3 +22,11 @@ select,
 textarea {
     max-width: 280px;
 }
+
+
+.action-buttons {
+    display: inline-flex!important;
+    flex-direction: row-reverse;
+    width: 100%;
+    gap: 0.5rem;
+}

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ReadLater.Entities
 {
-    public class Bookmark : EntityBase  
+    public class Bookmark : EntityBase, IMustHaveUser 
     {
         [Key]
         public int ID { get; set; }
@@ -22,5 +23,7 @@ namespace ReadLater.Entities
         public virtual Category Category { get; set; }
 
         public DateTime CreateDate { get; set; }
+
+        public string UserId { get; set; }
     }
 }

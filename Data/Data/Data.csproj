@@ -36,6 +36,12 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\..\ReadLater\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ReadLater\packages\Microsoft.AspNet.Identity.Core.2.2.2\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ReadLater\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.2\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -46,11 +52,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationDbContext.cs" />
     <Compile Include="DbContextExtension.cs" />
     <Compile Include="IDbContext.cs" />
     <Compile Include="Migrations\201405071026235_Initial.cs" />
     <Compile Include="Migrations\201405071026235_Initial.Designer.cs">
       <DependentUpon>201405071026235_Initial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202007200106386_AddUserToCategoriesAndBookmarks.cs" />
+    <Compile Include="Migrations\202007200106386_AddUserToCategoriesAndBookmarks.Designer.cs">
+      <DependentUpon>202007200106386_AddUserToCategoriesAndBookmarks.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,6 +80,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201405071026235_Initial.resx">
       <DependentUpon>201405071026235_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202007200106386_AddUserToCategoriesAndBookmarks.resx">
+      <DependentUpon>202007200106386_AddUserToCategoriesAndBookmarks.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

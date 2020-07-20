@@ -34,6 +34,7 @@ namespace ReadLater.Data
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             EntityTypeConfiguration<Category> categoryMap = modelBuilder.Entity<Category>();
             EntityTypeConfiguration<Bookmark> bookmarkMap = modelBuilder.Entity<Bookmark>();
         }

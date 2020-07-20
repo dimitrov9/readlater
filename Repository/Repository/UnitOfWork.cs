@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ReadLater.Data;
+using ReadLater.Entities;
 
 namespace ReadLater.Repository
 {
@@ -14,6 +16,8 @@ namespace ReadLater.Repository
 
         private bool _disposed;
         private Hashtable _repositories;
+
+        public string CurrentUserId;
 
         public UnitOfWork(IDbContext context)
         {
@@ -28,6 +32,11 @@ namespace ReadLater.Repository
 
         public void Save()
         {
+            foreach (var auditableEntity in _context.ChangeTracker.Entries<IMustHaveUser>())
+            {
+                auditableEntity.Entity.UserId = CurrentUserId;
+            }
+
             _context.SaveChanges();
         }
 
@@ -59,6 +68,11 @@ namespace ReadLater.Repository
             }
 
             return (IRepository<T>)_repositories[type];
+        }
+
+        public void SetCurrentUserId(string id)
+        {
+            CurrentUserId = id;
         }
     }
 }

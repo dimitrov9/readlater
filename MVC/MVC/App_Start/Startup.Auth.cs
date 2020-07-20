@@ -6,6 +6,8 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
 using Owin;
 using MVC.Models;
+using ReadLater.Services;
+using ReadLater.Entities;
 
 namespace MVC
 {

@@ -12,5 +12,6 @@ namespace ReadLater.Repository
         void Save();
         void Dispose(bool disposing);
         IRepository<T> Repository<T>() where T : class;
+        void SetCurrentUserId(string id);
     }
 }

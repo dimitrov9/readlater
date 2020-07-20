@@ -14,5 +14,6 @@ namespace ReadLater.Data
         int SaveChanges();
         DbEntityEntry Entry(object o);
         void Dispose();
+        DbChangeTracker ChangeTracker { get; }
     }
 }

@@ -4,5 +4,30 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Bookmarks</h2>
+<h2>
+    Bookmarks
+    <button id="btn-create" class="btn btn-default" onclick="showCreateForm()">Create New</button>
+</h2>
 
+<input type="hidden" id="apiUrl" data-value="@ViewBag.ApiUrl" />
+<form id="create-bookmark-form"></form>
+
+<table class="table">
+    <tr id="table-header">
+        <th>Description</th>
+        <th>Category</th>
+        <th></th>
+    </tr>
+
+    <tr id="bookmarks-loader">
+        <td>Loading..</td>
+        <td></td>
+        <td></td>
+    </tr>
+
+</table>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript" src="~/Scripts/bookmarks.js"></script>
+}
