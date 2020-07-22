@@ -1,17 +1,9 @@
 ﻿var apiUrl;
 var _categories;
-var categories$;
 
 $(document).ready(function () {
     apiUrl = $("#apiUrl").data("value");
     fetchBookmarks();
-    categories$ = new Promise((resolve, reject) => {
-        if (_categories) {
-            resolve(_categories);
-        } else {
-            $.get(`${apiUrl}/categories`).then(resolve, reject);
-        }
-    });
 
     $("#create-bookmark-form").on("submit", function (e) {
         saveBookmark();
@@ -20,11 +12,38 @@ $(document).ready(function () {
 });
 
 function fetchBookmarks() {
-    $.get(apiUrl + "/bookmarks", function (data) {
-        $("#bookmarks-loader").remove();
-        const rows = data.map(bookmark => mapBookmarkToTableRow(bookmark));
-        $("#table-header").after(rows);
+    $.ajax({
+        type: "GET",
+        url: apiUrl + "/bookmarks",
+        cache: false,
+        crossDomain: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function (data) {
+            $("#bookmarks-loader").remove();
+            const rows = data.map(bookmark => mapBookmarkToTableRow(bookmark));
+            $("#table-header").after(rows);
+        }
     });
+}
+
+async function getCategories() {
+    if (_categories) {
+        return Promise.resolve(_categories);
+    } else {
+        _categories = await $.ajax({
+            type: "GET",
+            url: `${apiUrl}/categories`,
+            cache: false,
+            crossDomain: false,
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+        return _categories;
+    }
 }
 
 async function showCreateForm() {
@@ -39,10 +58,15 @@ async function showCreateForm() {
                 <input type="text" id="input-description" class="form-control" placeholder="Description" form="create-bookmark-form" />
             </div>
         </td>
-        <td class="form-group">
-            <select id="input-category" class="form-control" form="create-bookmark-form">
-                <option>Loading...</option>
-            </select>
+        <td>
+            <div class="form-group">
+                <select id="input-category" class="form-control" form="create-bookmark-form">
+                    <option>Loading...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="hidden" id="input-new-category" class="form-control" placeholder="Create New Category" form="create-bookmark-form" />
+            </div>
         </td>
         <td class="action-buttons">
             <button class="btn btn-success" form="create-bookmark-form" type="submit" >Save</button>
@@ -51,12 +75,24 @@ async function showCreateForm() {
     </tr>`
 
     $("#table-header").after(html);
-    categories$.then(categories => $("#input-category").html(mapCategoriesToSelectOptions(categories)));
+    const categories = await getCategories();
+    $("#input-category").html(mapCategoriesToSelectOptions(categories));
+
+    $("#input-category").change(function () {
+        var selected = $(this).children("option:selected").val();
+
+        if (selected === "new") {
+            $("#input-new-category").attr("type", "text");
+        } else {
+            $("#input-new-category").attr("type", "hidden");
+        }
+    });
 }
 
 function mapCategoriesToSelectOptions(categories, selected) {
     return [
         `<option value ${selected ? "" : "selected"} > --No Category-- </option > `,
+        `<option value="new" > New Category </option>`,
         ...categories.map(c => `<option value="${c.ID}" ${selected === c.Name ? "selected" : ""}>${c.Name}</option>`)
     ];
 }
@@ -70,22 +106,41 @@ function saveBookmark() {
     $("#create-bookmark-form").validate();
     if (!$("#create-bookmark-form").valid()) return;
 
-    const url = $("#input-url").val();
-    const desc = $("#input-description").val();
-    const categoryId = +$("#input-category").children("option:selected").val();
+    const data = {
+        url: $("#input-url").val(),
+        description: $("#input-description").val(),
+    }
 
-    $.post(apiUrl + "/bookmarks", {
-        url: url,
-        description: desc,
-        categoryId: categoryId
-    }, function (data) {
-        hideCreateForm();
-        const row = mapBookmarkToTableRow(data);
-        $("#table-header").after(row);
+    const category = $("#input-category").children("option:selected").val();
+
+    if (category) {
+        if (category === "new") {
+            data.newCategory = $("#input-new-category").val();
+            _categories = null;
+        } else {
+            data.categoryId = +category;
+        }
+    }
+
+    $.ajax({
+        type: "POST",
+        url: apiUrl + "/bookmarks",
+        cache: false,
+        crossDomain: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        data: data,
+        success: function (data) {
+            hideCreateForm();
+            const row = mapBookmarkToTableRow(data);
+            $("#table-header").after(row);
+        }
     });
 }
 
-mapBookmarkToTableRow = (bookmark) => `    
+function mapBookmarkToTableRow(bookmark) {
+    return `    
     <tr id="bookmark-row-${bookmark.ID}">
         <td class="col-md-6">
             <a href="${bookmark.URL}" >${bookmark.ShortDescription}</a>
@@ -96,11 +151,17 @@ mapBookmarkToTableRow = (bookmark) => `
             <button class="btn btn-danger" onclick="deleteBookmark(${bookmark.ID})">Delete</button>
         </td>
     </tr>`;
+}
 
 function deleteBookmark(bookmarkId) {
     $.ajax({
         url: `${apiUrl}/bookmarks/${bookmarkId}`,
         type: 'DELETE',
+        cache: false,
+        crossDomain: false,
+        xhrFields: {
+            withCredentials: true
+        },
         success: function () {
             $(`#bookmark-row-${bookmarkId}`).remove();
         }
@@ -128,10 +189,15 @@ async function editBookmark(bookmarkId) {
                     placeholder="Description" form="edit-bookmark-form-${bookmarkId}" value="${desc}"/>
             </div>
         </td>
-        <td class="form-group">
-            <select id="input-category-${bookmarkId}" class="form-control" form="edit-bookmark-form-${bookmarkId}">
-                <option>Loading...</option>
-            </select>
+        <td>
+            <div class="form-group">
+                <select id="input-category-${bookmarkId}" class="form-control" form="edit-bookmark-form-${bookmarkId}">
+                    <option>Loading...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="hidden" id="input-new-category-${bookmarkId}" class="form-control" placeholder="Create New Category" form="create-bookmark-form-${bookmarkId}" />
+            </div>
         </td>
         <td class="action-buttons">
             <button class="btn btn-success" form="edit-bookmark-form-${bookmarkId}" type="submit">Save</button>
@@ -141,12 +207,22 @@ async function editBookmark(bookmarkId) {
 
     bookmarkRow.hide();
     bookmarkRow.after(formHtml);
-    categories$.then(categories => $(`#input-category-${bookmarkId}`).html(mapCategoriesToSelectOptions(categories, categoryName)));
-
+    const categories = await getCategories();
+    $(`#input-category-${bookmarkId}`).html(mapCategoriesToSelectOptions(categories, categoryName));
 
     $(`#edit-bookmark-form-${bookmarkId}`).on("submit", function (e) {
         submitEditBookmark(bookmarkId);
         e.preventDefault();
+    });
+
+    $(`#input-category-${bookmarkId}`).change(function () {
+        var selected = $(this).children("option:selected").val();
+
+        if (selected === "new") {
+            $(`#input-new-category-${bookmarkId}`).attr("type", "text");
+        } else {
+            $(`#input-new-category-${bookmarkId}`).attr("type", "hidden");
+        }
     });
 }
 
@@ -160,18 +236,31 @@ function submitEditBookmark(bookmarkId) {
     $(`#edit-bookmark-form-${bookmarkId}`).validate();
     if (!$(`#edit-bookmark-form-${bookmarkId}`).valid()) return;
 
-    const url = $(`#input-url-${bookmarkId}`).val();
-    const desc = $(`#input-description-${bookmarkId}`).val();
-    const categoryId = +$(`#input-category-${bookmarkId}`).children("option:selected").val();
+    const data = {
+        url: $(`#input-url-${bookmarkId}`).val(),
+        description: $(`#input-description-${bookmarkId}`).val(),
+    }
+
+    const category = $(`#input-category-${bookmarkId}`).children("option:selected").val();
+
+    if (category) {
+        if (category === "new") {
+            data.newCategory = $(`#input-new-category-${bookmarkId}`).val();
+            _categories = null;
+        } else {
+            data.categoryId = +category;
+        }
+    }
 
     $.ajax({
         url: `${apiUrl}/bookmarks/${bookmarkId}`,
         type: 'PUT',
-        data: {
-            url: url,
-            description: desc,
-            categoryId: categoryId
+        cache: false,
+        crossDomain: false,
+        xhrFields: {
+            withCredentials: true
         },
+        data: data,
         success: function (bookmark) {
             hideEditForm(bookmarkId);
             $(`#bookmark-row-${bookmarkId}`).after(mapBookmarkToTableRow(bookmark));

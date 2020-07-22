@@ -6,7 +6,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
-using MVC.Models;
+using ReadLater.Data;
 using ReadLater.Entities;
 
 namespace ReadLater.Services

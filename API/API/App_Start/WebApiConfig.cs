@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System.Net.Http.Formatting;
+using System.Web.Http;
 
 namespace API
 {
@@ -6,6 +7,10 @@ namespace API
     {
         public static void Register(HttpConfiguration config)
         {
+            config.Formatters.Clear();
+            config.Formatters.Add(new XmlMediaTypeFormatter());
+            config.Formatters.Add(new JsonMediaTypeFormatter());
+            config.Formatters.Add(new FormUrlEncodedMediaTypeFormatter());
             // Web API configuration and services
             config.EnableCors();
             // Web API routes

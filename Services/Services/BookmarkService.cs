@@ -47,6 +47,7 @@ namespace ReadLater.Services
         {
             return _unitOfWork.Repository<Bookmark>().Query()
                                                     .Filter(c => c.ID == Id)
+                                                    .Include(x => x.Category)
                                                     .Get()
                                                     .FirstOrDefault();
         }

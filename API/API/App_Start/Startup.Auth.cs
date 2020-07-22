@@ -6,9 +6,12 @@ using Microsoft.Owin.Security.Cookies;
 using Owin;
 using ReadLater.Services;
 using ReadLater.Entities;
+using Microsoft.Owin.Security.OAuth;
+using System.Threading.Tasks;
+using System.Security.Claims;
 using ReadLater.Data;
 
-namespace MVC
+namespace API
 {
     public partial class Startup
     {
@@ -26,7 +29,6 @@ namespace MVC
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
                 AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
-                LoginPath = new PathString("/Account/Login"),
                 Provider = new CookieAuthenticationProvider
                 {
                     // Enables the application to validate the security stamp when the user logs in.
@@ -35,7 +37,19 @@ namespace MVC
                         validateInterval: TimeSpan.FromMinutes(30),
                         regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager))
                 }
-            });            
+            });
+
+            app.UseOAuthAuthorizationServer(new OAuthAuthorizationServerOptions
+            {
+                TokenEndpointPath = new PathString("/oauth/token"),
+                Provider = new AuthorizationServerProvider(),
+                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(30),
+                AllowInsecureHttp = true
+            });
+
+            // OAuth 2.0 Bearer Access Token Generation
+            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
+
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             // Enables the application to temporarily store user information when they are verifying the second factor in the two-factor authentication process.
@@ -64,6 +78,54 @@ namespace MVC
             //    ClientId = "",
             //    ClientSecret = ""
             //});
+        }
+    }
+
+    public class AuthorizationServerProvider : OAuthAuthorizationServerProvider
+    {
+        public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        {
+            string clientId;
+            string clientSecret;
+
+            if (context.TryGetBasicCredentials(out clientId, out clientSecret))
+            {
+                // validate the client Id and secret against database or from configuration file.  
+                context.Validated();
+            }
+            else
+            {
+                context.SetError("invalid_client", "Client credentials could not be retrieved from the Authorization header");
+                context.Rejected();
+            }
+        }
+        public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
+        {
+            ApplicationUserManager userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
+            ApplicationUser user;
+            try
+            {
+                user = await userManager.FindAsync(context.UserName, context.Password);
+            }
+            catch
+            {
+                // Could not retrieve the user due to error.  
+                context.SetError("server_error");
+                context.Rejected();
+                return;
+            }
+            if (user != null)
+            {
+                ClaimsIdentity identity = await userManager.CreateIdentityAsync(
+                                                        user,
+                                                        DefaultAuthenticationTypes.ExternalBearer);
+                context.Validated(identity);
+            }
+            else
+            {
+                context.SetError("invalid_grant", "Invalid User Id or password'");
+                context.Rejected();
+            }
         }
     }
 }

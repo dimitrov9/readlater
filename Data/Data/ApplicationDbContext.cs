@@ -2,7 +2,7 @@
 using ReadLater.Entities;
 using System.Data.Entity;
 
-namespace MVC.Models
+namespace ReadLater.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {

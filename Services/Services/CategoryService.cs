@@ -53,6 +53,18 @@ namespace ReadLater.Services
 
         public void DeleteCategory(Category category)
         {
+            var bookmarks = _unitOfWork.Repository<Bookmark>().Query()
+                .Filter(x => x.CategoryId == category.ID)
+                .Get()
+                .ToList();
+
+            foreach (var bookmark in bookmarks)
+            {
+                bookmark.Category = null;
+                bookmark.CategoryId = null;
+                _unitOfWork.Repository<Bookmark>().Update(bookmark);
+            }
+
             _unitOfWork.Repository<Category>().Delete(category);
             _unitOfWork.Save();
         }

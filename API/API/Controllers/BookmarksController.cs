@@ -4,6 +4,7 @@ using ReadLater.Repository;
 using ReadLater.Services;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -35,7 +36,7 @@ namespace API.Controllers
         [HttpPost]
         public IHttpActionResult Post([FromBody] CreateBookmarkModel model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (model == null || !ModelState.IsValid) return BadRequest(ModelState);
 
             var bookmark = new Bookmark
             {
@@ -43,14 +44,13 @@ namespace API.Controllers
                 ShortDescription = string.IsNullOrWhiteSpace(model.Description) ? model.Url : model.Description
             };
 
-            if (model.CategoryId.HasValue && model.CategoryId.Value != 0)
+            try
             {
-                var category = categoryService.GetCategory(model.CategoryId.Value);
-
-                if (category == null) return NotFound();
-
-                bookmark.Category = category;
-                bookmark.CategoryId = category.ID;
+                bookmark = CategorizeBookmark(model, bookmark);
+            }
+            catch (ObjectNotFoundException)
+            {
+                return NotFound();
             }
 
             bookmark = bookmarkService.CreateBookmark(bookmark);
@@ -73,7 +73,7 @@ namespace API.Controllers
         [HttpPut]
         public IHttpActionResult Put(int id, [FromBody] CreateBookmarkModel model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (model == null || !ModelState.IsValid) return BadRequest(ModelState);
 
             var bookmark = bookmarkService.GetBookmark(id);
 
@@ -82,12 +82,33 @@ namespace API.Controllers
             bookmark.ShortDescription = string.IsNullOrWhiteSpace(model.Description) ? model.Url : model.Description;
             bookmark.URL = model.Url;
 
+            try
+            {
+                bookmark = CategorizeBookmark(model, bookmark);
+            }
+            catch (ObjectNotFoundException)
+            {
+                return NotFound();
+            }
+            
+            bookmarkService.UpdateBookmark(bookmark);
+
+            return Ok(bookmark);
+        }
+
+        private Bookmark CategorizeBookmark(CreateBookmarkModel model, Bookmark bookmark)
+        {
             if (model.CategoryId.HasValue && model.CategoryId.Value != 0)
             {
                 var category = categoryService.GetCategory(model.CategoryId.Value);
-
-                if (category == null) return NotFound();
-
+                bookmark.Category = category ?? throw new ObjectNotFoundException();
+                bookmark.CategoryId = category.ID;
+            }
+            else if (!string.IsNullOrWhiteSpace(model.NewCategory))
+            {
+                var category = new Category { Name = model.NewCategory };
+                category = categoryService.CreateCategory(category);
+                category.ObjectState = ObjectState.Unchanged;
                 bookmark.Category = category;
                 bookmark.CategoryId = category.ID;
             }
@@ -97,9 +118,7 @@ namespace API.Controllers
                 bookmark.CategoryId = null;
             }
 
-            bookmarkService.UpdateBookmark(bookmark);
-
-            return Ok(bookmark);
+            return bookmark;
         }
     }
 }

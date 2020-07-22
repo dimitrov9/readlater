@@ -13,11 +13,12 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
 using EntityFramework.DynamicFilters;
 using Z.EntityFramework.Plus;
+using API.Filters;
 
 namespace API.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
     [Authorize]
+    [LoggingFilter]
     public class BaseApiController : ApiController
     {
     }
